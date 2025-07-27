@@ -1,0 +1,23 @@
+#!/bin/bash
+
+help() {
+    echo this is help
+}
+
+version() {
+    echo this is version 0.1
+}
+
+
+if [ -d "~/.gamma" ]; then
+    mkdir ~/.gamma
+    mkdir ~/.gamma/gamefiles
+    mkdir ~/.gamma/shortcuts
+fi
+
+if [ -z "$1" ]; then
+    help
+    version
+else
+    echo kalfjk
+fi
