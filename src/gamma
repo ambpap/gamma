@@ -4,6 +4,8 @@ basedir="$HOME/.gammagames"
 linkdir="$basedir/links"
 datadir="$basedir/data"
 
+VERSION="0.1.1"
+
 #creating directories
 mkdir -p "$basedir"
 mkdir -p "$linkdir"
@@ -14,14 +16,13 @@ show_help() {
     this is help
 EOF
 }
-VERSION="0.1.0"
 
 show_version() {
     echo -e "Gamma - CLI game manager\nversion $VERSION"
 }
 
 get_title_from_index() {
-    titles=("$linkdir"/*)
+    local titles=("$linkdir"/*)
     echo "${titles[$(($1-1))]}"
 }
 
@@ -43,7 +44,14 @@ case "$1" in
         ;;
     list)
         titles=("$linkdir"/*)
+        index=0
+        for title in "${titles[@]}"; do
+            echo "$((++index)) ${title##*/}"
+        done
         #TODO
+        #playtime
+        #tags
+        #size
         ;;
     rename)
         if [ ! -f "$linkdir/$2" ]; then
