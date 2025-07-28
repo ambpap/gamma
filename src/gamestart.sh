@@ -41,7 +41,7 @@ else
             rm -- "~/.gamma/links/$0" #remove this script
             ;;
         tag | t)
-            if [ -z "$2" && -z "$3"]; then
+            if [ -z "$3" ]; then
                 #list tags for the game
                 ls $GAMEDIR/.gammatags
             else

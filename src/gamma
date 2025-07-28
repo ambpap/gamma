@@ -1,23 +1,135 @@
 #!/bin/bash
 
-help() {
-    echo this is help
+basedir="$HOME/.gammagames"
+linkdir="$basedir/links"
+datadir="$basedir/data"
+
+#creating directories
+mkdir -p "$basedir"
+mkdir -p "$linkdir"
+mkdir -p "$datadir"
+
+show_help() {
+    cat <<EOF
+    this is help
+EOF
+}
+VERSION="0.1.0"
+
+show_version() {
+    echo -e "Gamma - CLI game manager\nversion $VERSION"
 }
 
-version() {
-    echo this is version 0.1
+get_title_from_index() {
+    titles=("$linkdir"/*)
+    echo "${titles[$(($1-1))]}"
 }
 
 
-if [ -d "~/.gamma" ]; then
-    mkdir ~/.gamma
-    mkdir ~/.gamma/gamefiles
-    mkdir ~/.gamma/shortcuts
-fi
+case "$1" in
+    start)
+        if [[ "$2" == "index" ]]; then
+            if [[ ! "$3" =~ ^[0-9]+$ ]]; then
+                echo "Invalid index"
+                exit 1
+            fi
+            #runs at index
+            "$linkdir/$(get_title_from_index $3)"
+        elif [ ! -f "$linkdir/$2" ]; then
+            echo "File doesn't exist"
+        fi
+        #runs normally
+        "$linkdir/'$3'"
+        ;;
+    list)
+        titles=("$linkdir"/*)
+        #TODO
+        ;;
+    rename)
+        if [ ! -f "$linkdir/$2" ]; then
+            echo "File not found"
+        fi
+        mv "$linkdir/$2" "$linkdir/$3"
+        ;;
+    path)
+        case "$2" in
+            add)
+                echo "export PATH=\"\$PATH:$linkdir\"" >> ~/.bashrc
+                source ~/.bashrc
+                echo Added games to PATH
+                ;;
+            remove)
+                grep -v "export PATH=\"\$PATH:$linkdir\"" ~/.bashrc > \
+                    ~/.bashrc.gammatmp && mv ~/.bashrc.gammatmp ~/.bashrc
+                source ~/.bashrc
+                echo Removed games from PATH
+                ;;
+            *)
+                if grep -q "export PATH=\"\$PATH:$linkdir\"" ~/.bashrc ; then
+                    echo Games are in PATH. Use "gamma path remove" to remove them
+                else
 
-if [ -z "$1" ]; then
-    help
-    version
-else
-    echo kalfjk
-fi
+                    echo Games are not in PATH. Use "gamma path add" to remove them
+                fi
+                ;;
+        esac
+        ;;
+    tag)
+        if [ -z "$4" ]; then
+            if [ -z "$2" || ! -f "$linkdir/$2" ]; then
+                echo No title given or title does not exist
+                exit 1
+            elif [ ! -z "$3" ]; then
+                echo "Not enough arguments given"
+                exit 1
+            fi
+            "$linkdir/$2 tag"
+        fi
+
+        case "$3" in
+            add)
+                "$linkdir/$2 tag a $4"
+                ;;
+            remove)
+                "$linkdir/$2 tag rm $4"
+                ;;
+            *)
+                echo Invalid argument
+                exit 1
+                ;;
+        esac
+        ;;
+    edit)
+        if [ ! -f "$linkdir/$2" ]; then
+            echo "File not found"
+        fi
+        vim "$linkdir/$2"
+        ;;
+    delete | del)
+        if [[ "$2" == "index" ]]; then
+            if [[ ! "$3" =~ ^[0-9]+$ ]]; then
+                echo "Invalid index"
+                exit 1
+            fi
+            #runs at index
+            "$linkdir/$(get_title_from_index $3) del"
+        elif [ ! -f "$linkdir/$2" ]; then
+            echo "File not found"
+        fi
+        #runs normally
+        "$linkdir/$3 del"
+        ;;
+    install)
+        #TODO
+        ;;
+    help)
+        show_help
+        ;;
+    version)
+        show_version
+        ;;
+    *)
+        show_help
+        show_version
+        ;;
+esac
